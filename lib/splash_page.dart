@@ -80,11 +80,6 @@ class _SplashPageState extends State<SplashPage> {
     if (build.version.sdkInt >= 30) {
       var permission = await Permission.manageExternalStorage.request();
       if (permission.isGranted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('status 2 executed'),
-          ),
-        );
         await _getStatuses();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -96,8 +91,6 @@ class _SplashPageState extends State<SplashPage> {
     } else {
       var permission = await Permission.storage.request();
       if (permission.isGranted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('status 1 executed')));
         await _getStatuses();
       } else {
         ScaffoldMessenger.of(context)
@@ -128,11 +121,15 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('WhatsApp Status Saver'),
-      ),
-      body: const Center(child: Text('Splash Page')),
+    return const Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+          child: Text(
+        'Splash Page',
+        style: TextStyle(
+          fontSize: 18,
+        ),
+      )),
     );
   }
 }
