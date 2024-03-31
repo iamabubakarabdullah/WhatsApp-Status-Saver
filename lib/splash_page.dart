@@ -21,6 +21,30 @@ class _SplashPageState extends State<SplashPage> {
     _navigateToHome();
   }
 
+  Future<void> _checkPermissions() async {
+    AndroidDeviceInfo build = await DeviceInfoPlugin().androidInfo;
+    if (build.version.sdkInt > 29) {
+      var permission = await Permission.manageExternalStorage.request();
+      if (permission.isGranted) {
+        await _getStatuses();
+      } else if (permission.isDenied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Manage External Storage not granted'),
+          ),
+        );
+      }
+    } else {
+      var permission = await Permission.storage.request();
+      if (permission.isGranted) {
+        await _getStatuses();
+      } else if (permission.isDenied) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Storage not granted')));
+      }
+    }
+  }
+
   Future<void> _getStatuses() async {
     List<File> images = [];
     List<File> videos = [];
@@ -32,6 +56,37 @@ class _SplashPageState extends State<SplashPage> {
       Directory statusDir = Directory(statusDirPath);
       if (!await statusDir.exists()) {
         statusDir = Directory(statusDirPath2);
+        if (await statusDir.exists()) {
+          // Get list of status files
+          List<FileSystemEntity> statusFiles =
+              Directory(statusDir.path).listSync();
+
+          // Check file type and add to corresponding lists
+          for (FileSystemEntity file in statusFiles) {
+            if (file is File) {
+              if (_isImage(file.path)) {
+                images.add(file);
+              } else if (_isVideo(file.path)) {
+                videos.add(file);
+              }
+            }
+          }
+        }
+      } else {
+        // Get list of status files
+        List<FileSystemEntity> statusFiles =
+            Directory(statusDir.path).listSync();
+
+        // Check file type and add to corresponding lists
+        for (FileSystemEntity file in statusFiles) {
+          if (file is File) {
+            if (_isImage(file.path)) {
+              images.add(file);
+            } else if (_isVideo(file.path)) {
+              videos.add(file);
+            }
+          }
+        }
       }
       // if (!await statusDir.exists()) {
       //   ScaffoldMessenger.of(context).clearSnackBars();
@@ -41,23 +96,11 @@ class _SplashPageState extends State<SplashPage> {
       //     ),
       //   );
       // }
-      // Get list of status files
-      List<FileSystemEntity> statusFiles = Directory(statusDir.path).listSync();
-
-      // Check file type and add to corresponding lists
-      for (FileSystemEntity file in statusFiles) {
-        if (file is File) {
-          if (_isImage(file.path)) {
-            images.add(file);
-          } else if (_isVideo(file.path)) {
-            videos.add(file);
-          }
-        }
-      }
     } catch (e) {
       //ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(e.toString())));
+      throw Exception(e.toString());
     }
     setState(() {
       imageFiles = images;
@@ -73,30 +116,6 @@ class _SplashPageState extends State<SplashPage> {
   bool _isVideo(String path) {
     String extension = path.split('.').last.toLowerCase();
     return extension == 'mp4' || extension == 'avi' || extension == 'mov';
-  }
-
-  Future<void> _checkPermissions() async {
-    AndroidDeviceInfo build = await DeviceInfoPlugin().androidInfo;
-    if (build.version.sdkInt >= 30) {
-      var permission = await Permission.manageExternalStorage.request();
-      if (permission.isGranted) {
-        await _getStatuses();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Manage External Storage not granted'),
-          ),
-        );
-      }
-    } else {
-      var permission = await Permission.storage.request();
-      if (permission.isGranted) {
-        await _getStatuses();
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Storage not granted')));
-      }
-    }
   }
 
   void _navigateToHome() async {
