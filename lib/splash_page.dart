@@ -50,8 +50,9 @@ class _SplashPageState extends State<SplashPage> {
     List<File> videos = [];
     try {
       String statusDirPath =
-          '/storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Media/.Statuses/';
-      String statusDirPath2 = '/storage/emulated/0/WhatsApp/Media/.Statuses/';
+          '/storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Media/.Statuses/'; // for android 11 and 11 +
+      String statusDirPath2 =
+          '/storage/emulated/0/WhatsApp/Media/.Statuses/'; // for android 10 and below 10
 
       Directory statusDir = Directory(statusDirPath);
       if (!await statusDir.exists()) {
@@ -88,14 +89,6 @@ class _SplashPageState extends State<SplashPage> {
           }
         }
       }
-      // if (!await statusDir.exists()) {
-      //   ScaffoldMessenger.of(context).clearSnackBars();
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text('Directory Not Found'),
-      //     ),
-      //   );
-      // }
     } catch (e) {
       //ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context)
